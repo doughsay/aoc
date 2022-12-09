@@ -8,6 +8,6 @@ defmodule AoC.Day09Test do
   end
 
   test "gets the right answer for part two" do
-    assert Day09.part_two() == 0
+    assert Day09.part_two() == 2367
   end
 end
