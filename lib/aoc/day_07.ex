@@ -14,23 +14,23 @@ defmodule AoC.Day07 do
   @unused_required 30_000_000
 
   def part_two do
-    tree = data()
+    zipper = data()
 
-    total_used = size_of_tree(tree)
+    total_used = size_of_tree(zipper)
     total_unused = @total_disk_size - total_used
     delete_at_least = @unused_required - total_unused
 
-    tree
+    zipper
     |> Stream.unfold(&get_all_sizes/1)
     |> Enum.sort()
     |> Enum.find(&(&1 >= delete_at_least))
   end
 
-  defp get_all_sizes(tree) do
-    if Zipper.end?(tree) do
+  defp get_all_sizes(zipper) do
+    if Zipper.end?(zipper) do
       nil
     else
-      {size_of_tree(tree), Zipper.next(tree)}
+      {size_of_tree(zipper), Zipper.next(zipper)}
     end
   end
 
@@ -52,7 +52,7 @@ defmodule AoC.Day07 do
   end
 
   defp build_tree(lines) do
-    tree =
+    zipper =
       Zipper.zipper(
         fn node -> is_map(node) and Map.has_key?(node, :dirs) end,
         fn %{dirs: dirs} -> dirs end,
@@ -61,33 +61,33 @@ defmodule AoC.Day07 do
       )
 
     lines
-    |> Enum.reduce(tree, &process_line/2)
+    |> Enum.reduce(zipper, &process_line/2)
     |> Zipper.root()
   end
 
-  defp process_line("$ " <> command, tree), do: process_command(command, tree)
-  defp process_line("dir " <> dirname, tree), do: add_dir(tree, dirname)
-  defp process_line(size_and_filename, tree), do: add_file(tree, file_size(size_and_filename))
+  defp process_line("$ " <> command, zipper), do: process_command(command, zipper)
+  defp process_line("dir " <> dirname, zipper), do: add_dir(zipper, dirname)
+  defp process_line(file, zipper), do: add_file(zipper, file_size(file))
 
-  defp process_command("cd /", tree), do: Zipper.root(tree)
-  defp process_command("cd ..", tree), do: Zipper.up(tree)
-  defp process_command("cd " <> name, tree), do: tree |> Zipper.down() |> navigate_to(name)
-  defp process_command("ls", tree), do: tree
+  defp process_command("cd /", zipper), do: Zipper.root(zipper)
+  defp process_command("cd ..", zipper), do: Zipper.up(zipper)
+  defp process_command("cd " <> name, zipper), do: zipper |> Zipper.down() |> navigate_to(name)
+  defp process_command("ls", zipper), do: zipper
 
-  defp navigate_to(%Zipper{focus: %{name: dirname}} = tree, dirname), do: tree
-  defp navigate_to(tree, dirname), do: tree |> Zipper.right() |> navigate_to(dirname)
+  defp navigate_to(%Zipper{focus: %{name: dirname}} = zipper, dirname), do: zipper
+  defp navigate_to(zipper, dirname), do: zipper |> Zipper.right() |> navigate_to(dirname)
 
-  defp file_size(size_and_filename) do
-    [size, _filename] = String.split(size_and_filename, " ")
+  defp file_size(file) do
+    [size, _filename] = String.split(file, " ")
     String.to_integer(size)
   end
 
-  defp add_dir(tree, dirname) do
-    Zipper.append_child(tree, %{name: dirname, dirs: [], size: 0})
+  defp add_dir(zipper, dirname) do
+    Zipper.append_child(zipper, %{name: dirname, dirs: [], size: 0})
   end
 
-  defp add_file(tree, size) do
-    Zipper.edit(tree, fn node ->
+  defp add_file(zipper, size) do
+    Zipper.edit(zipper, fn node ->
       Map.update!(node, :size, &(&1 + size))
     end)
   end
