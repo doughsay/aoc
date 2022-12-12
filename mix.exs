@@ -25,7 +25,8 @@ defmodule AoC.MixProject do
     [
       {:ex_doc, "~> 0.27", only: :dev, runtime: false},
       {:ex_zipper, "~> 0.1.3"},
-      {:arrays, "~> 2.0"}
+      {:arrays, "~> 2.0"},
+      {:libgraph, "~> 0.7"}
     ]
   end
 end
