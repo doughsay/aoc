@@ -8,6 +8,6 @@ defmodule AoC.Day11Test do
   end
 
   test "gets the right answer for part two" do
-    assert Day11.part_two() == :TODO
+    assert Day11.part_two() == 11_614_682_178
   end
 end
